@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 	"os"
 	"time"
 )
@@ -59,9 +60,18 @@ func init() {
 func emit() {
 	done := make(chan bool)
 	ticker := time.NewTicker(time.Duration(interval) * time.Millisecond)
+	kafkaProducer, err := kafka.NewProducer(&kafka.ConfigMap{
+		"bootstrap.servers": "localhost",
+	})
+	if err != nil {
+		log.Error("kafka producer can not be initialized")
+		panic(err)
+	}
+
 	emitter := Emitter{
-		doneChan: make(chan bool),
-		tickChan: make(chan time.Time),
+		doneChan:      make(chan bool),
+		tickChan:      make(chan time.Time),
+		kafkaProducer: kafkaProducer,
 	}
 	go emitter.emit()
 	go start(done, ticker, emitter)

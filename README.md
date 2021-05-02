@@ -14,8 +14,12 @@ For now, it only covers proto buffers.
 
 ## run
 
-#### 1. to generate proto files:
+#### 1. generate proto files:
 `randevent generate -p=samples/person.proto`
 
-#### 2. to emit events
+#### 2. start kafka in docker container
+This step is produced following this [guide](https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html#step-1-download-and-start-cp-using-docker).
+`docker-compose up`
+
+#### 3. emit events
 `randevent emit -i=100`
