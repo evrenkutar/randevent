@@ -14,9 +14,24 @@ var (
 	rootCmd   = &cobra.Command{
 		Use:   "randevent",
 		Short: "Randevent is random event pusher to kafka",
-		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
-			Run()
+			log.Info("hello friend!")
+		},
+	}
+	genProtoCmd = &cobra.Command{
+		Use: "generate",
+		Run: func(cmd *cobra.Command, args []string) {
+			err := generateProto()
+			if err != nil {
+				log.Fatalf("proto generation failed: %d", err.Error())
+			}
+			log.Info("proto files generated")
+		},
+	}
+	emitCmd = &cobra.Command{
+		Use: "emit",
+		Run: func(cmd *cobra.Command, args []string) {
+			emit()
 		},
 	}
 )
@@ -32,31 +47,21 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&protoFile, "protofile", "p", "", "proto file to generate random events")
-	rootCmd.PersistentFlags().Int32VarP(&interval, "interval", "i", 50, "interval to generate")
-	err := rootCmd.MarkPersistentFlagRequired("protofile")
+	genProtoCmd.PersistentFlags().StringVarP(&protoFile, "protofile", "p", "", "proto file to generate random events")
+	emitCmd.PersistentFlags().Int32VarP(&interval, "interval", "i", 50, "interval to generate")
+	err := genProtoCmd.MarkPersistentFlagRequired("protofile")
 	if err != nil {
 		return
 	}
-	err = rootCmd.MarkPersistentFlagRequired("interval")
-	if err != nil {
-		return
-	}
+	rootCmd.AddCommand(emitCmd, genProtoCmd)
 }
 
-func Run() {
-	err := generateProto()
-	if err != nil {
-		log.Fatalf("proto generation failed: %d", err.Error())
-	}
-	log.Info("proto files generated")
-
+func emit() {
 	done := make(chan bool)
 	ticker := time.NewTicker(time.Duration(interval) * time.Millisecond)
 	emitter := Emitter{
 		doneChan: make(chan bool),
 		tickChan: make(chan time.Time),
-		event:    "heyho",
 	}
 	go emitter.emit()
 	go start(done, ticker, emitter)
