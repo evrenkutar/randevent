@@ -56,7 +56,9 @@ func Run() {
 	emitter := Emitter{
 		doneChan: make(chan bool),
 		tickChan: make(chan time.Time),
+		event:    "heyho",
 	}
+	go emitter.emit()
 	go start(done, ticker, emitter)
 
 	time.Sleep(10 * time.Second)

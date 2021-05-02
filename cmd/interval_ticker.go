@@ -5,7 +5,6 @@ import (
 )
 
 func start(done <-chan bool, ticker *time.Ticker, emitter Emitter) {
-	go emitter.emit()
 	for {
 		select {
 		case <-done:
