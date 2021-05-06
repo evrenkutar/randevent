@@ -2,8 +2,12 @@ package cmd
 
 import (
 	"errors"
-	log "github.com/sirupsen/logrus"
+	"fmt"
+	"io/ioutil"
 	"os/exec"
+	"path"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func generateProto() error {
@@ -15,22 +19,29 @@ func generateProto() error {
 		}
 	}
 
+	d, err := ioutil.ReadFile(protoFile)
+	if err != nil {
+		return &exec.Error{
+			Name: "file cannot be read",
+			Err: errors.New("file cannot be read"),
+		}
+	}
+	_, protoFileName := path.Split(protoFile)
+	err = ioutil.WriteFile(fmt.Sprintf("samples/%s", protoFileName), d, 0655)
+    if err != nil {
+    	return &exec.Error{
+			Name: "file cannot be saved",
+			Err: errors.New("file cannot be saved"),
+		}
+    }
+ 
 	command := &exec.Cmd{
 		Path: protocExc,
 		Args: []string{"",
 			"-I=samples", "--go_out=pb",
-			protoFile},
-		Env:          nil,
-		Dir:          "",
-		Stdin:        nil,
-		Stdout:       nil,
-		Stderr:       nil,
-		ExtraFiles:   nil,
-		SysProcAttr:  nil,
-		Process:      nil,
-		ProcessState: nil,
+			fmt.Sprintf("samples/%s", protoFileName)},
 	}
-	log.Info("proto generate command: %s", command.String())
+	log.Infof("proto generate command: %s", command.String())
 	err = command.Run()
 	if err != nil {
 		return err
