@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"time"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
-	"os"
-	"time"
 )
 
 var (
@@ -22,9 +23,9 @@ var (
 	genProtoCmd = &cobra.Command{
 		Use: "generate",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := generateProto()
+			err := GenerateProto(protoFile)
 			if err != nil {
-				log.Fatalf("proto generation failed: %d", err.Error())
+				log.Fatalf("proto generation failed: %d", err)
 			}
 			log.Info("proto files generated")
 		},

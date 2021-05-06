@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os/exec"
@@ -10,31 +9,31 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func generateProto() error {
+func GenerateProto(f string) error {
 	protocExc, err := exec.LookPath("protoc")
 	if err != nil {
 		return &exec.Error{
 			Name: "protoc executable not found",
-			Err:  errors.New("protoc executable not found"),
+			Err:  err,
 		}
 	}
 
-	d, err := ioutil.ReadFile(protoFile)
+	d, err := ioutil.ReadFile(f)
 	if err != nil {
 		return &exec.Error{
 			Name: "file cannot be read",
-			Err: errors.New("file cannot be read"),
+			Err:  err,
 		}
 	}
-	_, protoFileName := path.Split(protoFile)
+	_, protoFileName := path.Split(f)
 	err = ioutil.WriteFile(fmt.Sprintf("samples/%s", protoFileName), d, 0655)
-    if err != nil {
-    	return &exec.Error{
+	if err != nil {
+		return &exec.Error{
 			Name: "file cannot be saved",
-			Err: errors.New("file cannot be saved"),
+			Err:  err,
 		}
-    }
- 
+	}
+
 	command := &exec.Cmd{
 		Path: protocExc,
 		Args: []string{"",
